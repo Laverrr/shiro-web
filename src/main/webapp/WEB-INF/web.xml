@@ -1,0 +1,69 @@
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         id="WebApp_ID" version="3.0">
+
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>classpath:/spring/spring.xml</param-value>
+  </context-param>
+
+  <!-- 防止发生java.beans.Introspector内存泄露,应将它配置在ContextLoaderListener的前面 -->
+  <listener>
+    <listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+  </listener>
+  <!-- 实例化Spring容器 -->
+  <!-- 应用启动时,该监听器被执行,它会读取Spring相关配置文件,其默认会到WEB-INF中查找applicationContext.xml -->
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+  <!--<listener>-->
+    <!--<listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>-->
+  <!--</listener>-->
+
+  <filter>
+    <filter-name>CharacterEncoding</filter-name>
+
+    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>CharacterEncoding</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <!-- 配置Shiro过滤器,先让Shiro过滤系统接收到的请求 -->
+  <!-- 这里filter-name必须对应applicationContext.xml中定义的<bean id="shiroFilter"/> -->
+  <!-- 使用[/*]匹配所有请求,保证所有的可控请求都经过Shiro的过滤 -->
+  <!-- 通常会将此filter-mapping放置到最前面(即其他filter-mapping前面),以保证它是过滤器链中第一个起作用的 -->
+  <filter>
+    <filter-name>shiroFilter</filter-name>
+    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>shiroFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <!-- 解析springMvc -->
+  <servlet>
+    <servlet-name>springDispatcherServlet</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>classpath:spring/springmvc.xml</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <!-- 拦截器 拦截所有 -->
+  <servlet-mapping>
+    <servlet-name>springDispatcherServlet</servlet-name>
+    <url-pattern>*.do</url-pattern>
+  </servlet-mapping>
+
+</web-app>
