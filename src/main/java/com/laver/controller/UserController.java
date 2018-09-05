@@ -31,6 +31,8 @@ public class UserController {
     produces = "application/json;charset=utf-8")
     @ResponseBody
     public String login(User user){
+        StringBuilder result=new StringBuilder();
+
         Subject subject= SecurityUtils.getSubject();
         UsernamePasswordToken token=new UsernamePasswordToken(user.getUsername(),user.getPassword());
 
@@ -38,9 +40,15 @@ public class UserController {
             subject.login(token);
         } catch (AuthenticationException e) {
             logger.error(e.getMessage());
-            return "登陆失败";
+            return result.append("登陆失败").toString();
+        }
+        result.append("登陆成功,");
+        if (subject.hasRole("admin")){
+            result.append("有admin权限");
+        }else {
+            result.append("无admin权限");
         }
 
-        return "登陆成功";
+        return result.toString();
     }
 }

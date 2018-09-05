@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.sql.SQLException;
 import java.util.*;
 
 import static org.apache.shiro.web.filter.mgt.DefaultFilter.user;
@@ -34,25 +35,12 @@ public class CustomRealm extends AuthorizingRealm {
 
         String userName=(String)principals.getPrimaryPrincipal();
         //从数据库或缓存中获取角色数据
-        Set<String> roles=getRolesByUserName(userName);
-
+        Set<String> roles=getRoleByUserName(userName);
         Set<String> permissions=getPermissionsByUserName(userName);
         SimpleAuthorizationInfo simpleAuthorizationInfo=new SimpleAuthorizationInfo();
         simpleAuthorizationInfo.setStringPermissions(permissions);
         simpleAuthorizationInfo.setRoles(roles);
         return simpleAuthorizationInfo;
-    }
-    private Set<String> getRolesByUserName(String userName){
-        Set<String> sets=new HashSet<String>();
-        sets.add("user");
-        sets.add("admin");
-        return sets;
-    }
-    private Set<String> getPermissionsByUserName(String userName){
-        Set<String> sets=new HashSet<String>();
-        sets.add("user:delete");
-        sets.add("user:add");
-        return sets;
     }
 
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
@@ -71,10 +59,21 @@ public class CustomRealm extends AuthorizingRealm {
         return authenticationInfo;
     }
 
+    private Set<String> getPermissionsByUserName(String userName){
+        Set<String> sets=new HashSet<String>();
+        sets.add("user:delete");
+        sets.add("user:add");
+        return sets;
+    }
 
-    //模拟数据库访问
+    //从数据库获取数据
     private String getPasswordByUserName(String userName){
-        User user=userDao.getUserByUserName(userName);
+        User user= null;
+        try {
+            user = userDao.getUserByUserName(userName);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         if (user!=null){
             return user.getPassword();
         }

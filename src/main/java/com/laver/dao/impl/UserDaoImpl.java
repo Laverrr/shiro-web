@@ -1,8 +1,10 @@
 package com.laver.dao.impl;
 
 import com.laver.dao.UserDao;
+import com.laver.util.JDBCUtil;
 import com.laver.vo.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -10,8 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,42 +26,56 @@ import java.util.List;
 @Service
 public class UserDaoImpl implements UserDao {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    Connection connection= null;
+    PreparedStatement preparedStatement= null;
+    ResultSet resultSet= null;
 
     @Override
-    public User getUserByUserName(String username) {
+    public User getUserByUserName(String username)  {
+        String password= null;
+        String sql="select password from user where username = ?";
 
-        String sql= "select username,password from user where username = ?";
-
-        List<User> list= jdbcTemplate.query(sql, new String[]{username}, new RowMapper<User>() {
-
-            @Override
-            public User mapRow(ResultSet resultSet, int i) throws SQLException {
-                User user= new User();
-                user.setUsername(resultSet.getString("username"));
-                user.setPassword(resultSet.getString("password"));
-                return user;
+        JDBCUtil jdbcUtil = new JDBCUtil();
+        try {
+            connection = jdbcUtil.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1,username);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                password= this.resultSet.getString("password");
             }
-        });
-        if (CollectionUtils.isEmpty(list)){
-            return null;
-
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            jdbcUtil.releaseConnectn();
         }
-        return list.get(0);
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(password);
+        System.out.println(user.toString());
+        return user;
     }
 
     @Override
     public List<String> getRoleByUserName(String username) {
-        String sql= "select role from role where username = ?";
+        List<String> list=new ArrayList();
+        String sql="select role from role where username = ?";
 
-        jdbcTemplate.query(sql, new String[]{username}, new RowMapper<String>() {
-            @Override
-            public String mapRow(ResultSet resultSet, int i) throws SQLException {
-                return resultSet.getString("role");
+        JDBCUtil jdbcUtil = new JDBCUtil();
+        try {
+            connection = jdbcUtil.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1,username);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                list.add(resultSet.getString("role"));
             }
-        });
-
-        return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            jdbcUtil.releaseConnectn();
+        }
+        System.out.println(list.size());
+        return list;
     }
 }
