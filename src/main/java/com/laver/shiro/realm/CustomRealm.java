@@ -31,18 +31,6 @@ public class CustomRealm extends AuthorizingRealm {
     @Autowired
     private UserDao userDao;
 
-    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-
-        String userName=(String)principals.getPrimaryPrincipal();
-        //从数据库或缓存中获取角色数据
-        Set<String> roles=getRoleByUserName(userName);
-        Set<String> permissions=getPermissionsByUserName(userName);
-        SimpleAuthorizationInfo simpleAuthorizationInfo=new SimpleAuthorizationInfo();
-        simpleAuthorizationInfo.setStringPermissions(permissions);
-        simpleAuthorizationInfo.setRoles(roles);
-        return simpleAuthorizationInfo;
-    }
-
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
 
         //1.从主体传过来的认证信息中获得用户名
@@ -59,10 +47,22 @@ public class CustomRealm extends AuthorizingRealm {
         return authenticationInfo;
     }
 
+    protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
+
+        String userName=(String)principals.getPrimaryPrincipal();
+        //从数据库或缓存中获取角色数据
+        Set<String> roles=getRoleByUserName(userName);
+        Set<String> permissions=getPermissionsByUserName(userName);
+        SimpleAuthorizationInfo simpleAuthorizationInfo=new SimpleAuthorizationInfo();
+        simpleAuthorizationInfo.setStringPermissions(permissions);
+        simpleAuthorizationInfo.setRoles(roles);
+        return simpleAuthorizationInfo;
+    }
+
+
+
     private Set<String> getPermissionsByUserName(String userName){
-        Set<String> sets=new HashSet<String>();
-        sets.add("user:delete");
-        sets.add("user:add");
+        Set<String> sets=new HashSet<>(userDao.getPermissionByUserName(userName));
         return sets;
     }
 
@@ -87,7 +87,7 @@ public class CustomRealm extends AuthorizingRealm {
     }
 
     public static void main(String[] args) {
-        Md5Hash md5Hash=new Md5Hash("123456",salt);
+        Md5Hash md5Hash=new Md5Hash("admin",salt);
         System.out.println(md5Hash);
 
     }

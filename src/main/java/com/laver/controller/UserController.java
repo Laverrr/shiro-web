@@ -4,6 +4,8 @@ import com.laver.vo.User;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,5 +52,21 @@ public class UserController {
         }
 
         return result.toString();
+    }
+
+//    @RequiresPermissions("") 可以传数组 可以基于spring.xml的基础上再追加权限
+    @RequiresRoles("admin")
+    @RequestMapping(value = "/testRole.do",method = RequestMethod.GET)
+    @ResponseBody
+    public String testRole(){
+        return "testRole success";
+    }
+
+    @RequiresRoles("admin")
+    @RequiresPermissions("user:select")
+    @RequestMapping(value = "/testPerms.do",method = RequestMethod.GET)
+    @ResponseBody
+    public String testPerms(){
+        return "testPerms success";
     }
 }

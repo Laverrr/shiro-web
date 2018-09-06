@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by L on 2018/9/4.
@@ -78,4 +79,32 @@ public class UserDaoImpl implements UserDao {
         System.out.println(list.size());
         return list;
     }
+
+    @Override
+    public List<String> getPermissionByUserName(String userName) {
+
+        JDBCUtil jdbcUtil = new JDBCUtil();
+        List<String> list=new ArrayList();
+        String sql="select permission from roles_permissions where role = ?";
+        List<String> roles = getRoleByUserName(userName);
+        for (String role:roles){
+            try {
+                connection = jdbcUtil.getConnection();
+                preparedStatement = connection.prepareStatement(sql);
+                preparedStatement.setString(1,role);
+                resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()){
+                    list.add(resultSet.getString("permission"));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }finally {
+                jdbcUtil.releaseConnectn();
+            }
+        }
+        System.out.println(list.size());
+        return list;
+    }
+
+
 }

@@ -19,8 +19,9 @@
                 <!-- 设置登录页与登录路由可以匿名访问，实际开发过程中对于静态资源的访问也应该设置成 anon -->
                 /login.jsp = anon
                 /login.do = anon
+                <!--/testRole路径需要具有admin权限的用户才能访问-->
                 /testRole = roles["admin"]
-                /testPer = perms["update"]
+                /testPerms** = perms["user:update"]
                 <!--
                     设置所有的URL都必须要认证过后才可以登录
                     *：用于匹配零个或多个字符串
