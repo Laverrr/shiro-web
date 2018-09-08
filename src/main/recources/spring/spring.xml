@@ -2,11 +2,13 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+       http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <!--<import resource="spring-dao.xml"/>-->
     <context:component-scan base-package="com.laver"/>
+
     <!-- 配置 Shiro 的 Web 过滤器 -->
     <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
         <property name="securityManager" ref="securityManager" />
@@ -19,8 +21,10 @@
                 <!-- 设置登录页与登录路由可以匿名访问，实际开发过程中对于静态资源的访问也应该设置成 anon -->
                 /login.jsp = anon
                 /login.do = anon
-                <!--/testRole路径需要具有admin权限的用户才能访问-->
-                /testRole = roles["admin"]
+                <!--/testRole路径需要同时具有admin和user权限的用户才能访问-->
+                /testRole = roles["admin","user"]
+                <!--/testRole路径只需要具有admin或user权限的用户就能访问-->
+                /testRole = rolesOr["admin","user"]
                 /testPerms** = perms["user:update"]
                 <!--
                     设置所有的URL都必须要认证过后才可以登录
@@ -30,11 +34,21 @@
                 /** = authc
             </value>
         </property>
+        <property name="filters">
+            <util:map>
+                <entry key="rolesOr" value-ref="rolesOrFilter"/>
+            </util:map>
+        </property>
     </bean>
+
+    <bean class="com.laver.filter.RolesOrFilter" id="rolesOrFilter"/>
 
     <!-- 创建 DefaultWebSecurityManager 对象-->
     <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
         <property name="realm" ref="realm" />
+        <property name="sessionManager" ref="sessionManager"/>
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="rememberMeManager" ref="cookieRememberMeManager"/>
     </bean>
 
     <!-- 配置自定义 Realm -->
@@ -47,4 +61,22 @@
         <property name="hashAlgorithmName" value="md5" />
         <property name="hashIterations" value="1" />
     </bean>
+
+    <bean class="com.laver.session.CustomSessionManager" id="sessionManager">
+        <property name="sessionDAO" ref="redisSessionDao"/>
+    </bean>
+    <bean class="com.laver.session.RedisSessionDao" id="redisSessionDao"/>
+
+    <bean class="com.laver.cache.RedisCacheManager" id="cacheManager"/>
+
+    <bean class="org.apache.shiro.web.mgt.CookieRememberMeManager" id="cookieRememberMeManager">
+        <property name="cookie" ref="cookie"/>
+    </bean>
+
+    <bean class="org.apache.shiro.web.servlet.SimpleCookie" id="cookie">
+        <constructor-arg value="rememberMe"/>
+        <property name="maxAge" value="2000000"/>
+    </bean>
+
+    <import resource="spring-redis.xml"/>
 </beans>

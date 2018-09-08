@@ -56,7 +56,6 @@ public class JDBCUtil {
         try {
             //获得到数据库的连接
             connection = DriverManager.getConnection(url,user,password);
-            System.out.println("JDBCUtil getConnection " + connection);
         } catch (Exception e) {
             e.printStackTrace();
         }

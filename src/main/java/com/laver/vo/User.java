@@ -6,6 +6,7 @@ package com.laver.vo;
 public class User {
     String username;
     String password;
+    private boolean rememberMe;
 
     public String getRole() {
         return role;
@@ -16,6 +17,14 @@ public class User {
     }
 
     String role;
+
+    public boolean isRememberMe() {
+        return rememberMe;
+    }
+
+    public void setRememberMe(boolean rememberMe) {
+        this.rememberMe = rememberMe;
+    }
 
     public String getUsername() {
         return username;

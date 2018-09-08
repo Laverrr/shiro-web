@@ -102,7 +102,6 @@ public class UserDaoImpl implements UserDao {
                 jdbcUtil.releaseConnectn();
             }
         }
-        System.out.println(list.size());
         return list;
     }
 
