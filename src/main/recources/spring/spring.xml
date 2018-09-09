@@ -24,7 +24,7 @@
                 <!--/testRole路径需要同时具有admin和user权限的用户才能访问-->
                 /testRole = roles["admin","user"]
                 <!--/testRole路径只需要具有admin或user权限的用户就能访问-->
-                /testRole = rolesOr["admin","user"]
+                /testRole = rolesOr["admin","user"] <!--传过去rolesOrFilter的Object o-->
                 /testPerms** = perms["user:update"]
                 <!--
                     设置所有的URL都必须要认证过后才可以登录
@@ -40,7 +40,7 @@
             </util:map>
         </property>
     </bean>
-
+    <!--自定义的用户角色过滤器-->
     <bean class="com.laver.filter.RolesOrFilter" id="rolesOrFilter"/>
 
     <!-- 创建 DefaultWebSecurityManager 对象-->
@@ -70,10 +70,10 @@
     <bean class="com.laver.cache.RedisCacheManager" id="cacheManager"/>
 
     <bean class="org.apache.shiro.web.mgt.CookieRememberMeManager" id="cookieRememberMeManager">
-        <property name="cookie" ref="cookie"/>
+        <property name="cookie" ref="simpleCookie"/>
     </bean>
 
-    <bean class="org.apache.shiro.web.servlet.SimpleCookie" id="cookie">
+    <bean class="org.apache.shiro.web.servlet.SimpleCookie" id="simpleCookie">
         <constructor-arg value="rememberMe"/>
         <property name="maxAge" value="2000000"/>
     </bean>
