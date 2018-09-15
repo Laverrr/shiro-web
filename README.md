@@ -10,4 +10,4 @@ spring-context-shiro.xml 是将shiro配置从spring.xml里提取出来，本项�
 
 //todo shiro验证的整个流程
 
-![]()
+![](https://github.com/Laverrr/shiro-web/blob/master/shiro.png)
